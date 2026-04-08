@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            background: #4facfe;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        #chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .user {
+            align-self: flex-end;
+            background: #4facfe;
+            color: white;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background: #eee;
+        }
+
+        .input-area {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            background: #4facfe;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #3a8be0;
+        }
+
+        .typing {
+            font-size: 12px;
+            color: gray;
+            margin: 5px;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">🤖 Smart Chatbot</div>
+
+    <div id="chat-box"></div>
+
+    <div class="typing" id="typing"></div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Type a message..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+function handleKey(event) {
+    if (event.key === "Enter") {
+        sendMessage();
+    }
+}
+
+function addMessage(text, className) {
+    let chatBox = document.getElementById("chat-box");
+    let msg = document.createElement("div");
+    msg.className = "message " + className;
+    msg.innerText = text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function sendMessage() {
+    let inputField = document.getElementById("user-input");
+    let message = inputField.value;
+
+    if (message.trim() === "") return;
+
+    addMessage(message, "user");
+    inputField.value = "";
+
+    document.getElementById("typing").innerText = "Bot is typing...";
+
+    fetch("/get", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("typing").innerText = "";
+        addMessage(data.response, "bot");
+    });
+}
+</script>
+
+</body>
+</html>
